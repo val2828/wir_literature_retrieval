@@ -6,7 +6,7 @@ parser = api_parser.Parser()
 data_handler = dh.DataHandler()
 
 # query
-requests_data = collector.query_apis(terms_list=['data','graph'], operator='OR', max_results='100')
+requests_data = collector.query_apis(terms_list=['data','graph'], operator='OR', max_results='10')
 
 # parse query
 processed_data = {}
@@ -21,7 +21,11 @@ for source,request in requests_data.items():
 
 # save data to the db
 db_connection = data_handler.connect_to_db()
-data_handler.db_set_up(db_connection)
+
+# data_handler.db_set_up(db_connection)
 data_handler.db_update(db_connection, processed_data)
 data_handler.db_select_all(db_connection)
+
+
+
 db_connection.close()
