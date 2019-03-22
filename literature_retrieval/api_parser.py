@@ -14,7 +14,7 @@ class Parser:
         root = et.fromstring(request_data.text)
         data = {}
         for element in root:
-
+            # TODO: change into regex, come up with arxiv distinguishment
             if element.tag == '{http://www.w3.org/2005/Atom}entry':
                 id = ''
                 title = ''
@@ -44,7 +44,10 @@ class Parser:
                         'publish date': published,
                         'summary': summary,
                         'link': link,
-                        'authors': author_list}
+                        'authors': author_list,
+                        'source' : 'arxiv',
+                        'literature_type': 'paper'
+                               }
 
 
         return data
@@ -52,6 +55,7 @@ class Parser:
 
     def json_parse(self, request_data):
 
+        # TODO: add distinguishment for springer
 
         input_data = request_data.json()
         data = {}
@@ -63,15 +67,18 @@ class Parser:
             author_list = []
             for creator_dict in record['creators']:
                 author_list.append(creator_dict['creator'])
-
+            literature_type = record['contentType']
             data[title] = {'title': title,
-                        'publish date': publish_date,
+                        'publish_date': publish_date,
                         'summary': summary,
                         'link': link,
-                        'authors': author_list}
+                        'authors': author_list,
+                        'source': 'springer',
+                        'literature_type': literature_type
+                           }
 
         return data
 
-    # def parse_requests(self, requests_data)
-
+    def parse_requests(self,source, request_data):
+        return self.sources_dict[source](request_data)
 

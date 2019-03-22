@@ -11,7 +11,10 @@ class DataHandler:
             publish_date VARCHAR(255),
             summary TEXT,
             link VARCHAR(255),
-            authors TEXT ARRAY);
+            authors TEXT ARRAY,
+            source VARCHAR(255),
+            literature_type VARCHAR(255)
+            );
         """,
                 'delete_table' : """
         DROP TABLE articles;
@@ -25,7 +28,7 @@ class DataHandler:
             );
         """,
                 'update_table' : """
-        INSERT INTO articles(title, publish_date, summary, link, authors) VALUES( %s, %s, %s, %s, %s);
+        INSERT INTO articles(title, publish_date, summary, link, authors, source, literature_type) VALUES(%s, %s, %s, %s, %s, %s, %s);
         """,
                 'select_all' : """
         SELECT * FROM articles;
@@ -67,10 +70,10 @@ class DataHandler:
     def db_update(self, connection, api_output):
 
         cursor = connection.cursor()
-        for _, record in api_output.items():
-            for _, data_dict in record.items():
-                my_data = [data for data in data_dict.values()]
-                cursor.execute(self.COMMANDS['update_table'], tuple(my_data))
+
+        for _, data_dict in api_output.items():
+            my_data = [data for data in data_dict.values()]
+            cursor.execute(self.COMMANDS['update_table'], tuple(my_data))
         print('table updated')
 
         connection.commit()
