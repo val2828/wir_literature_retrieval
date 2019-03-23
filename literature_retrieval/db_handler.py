@@ -36,6 +36,9 @@ class DataHandler:
                 'check_if_such_already_exists': ("""
         select exists ( select title from articles where {} = %(value)s);   
         """),
+                'select_column': """
+        SELECT {} FROM articles;
+        """,
     }
 
 
@@ -76,23 +79,32 @@ class DataHandler:
         pprint(cursor.fetchall())
         cursor.close()
 
+    def db_select_column(self, connection, column):
+        cursor = connection.cursor()
+        cursor.execute(sql.SQL(self.COMMANDS['select_column']).format(sql.Identifier(column)))
+        pprint(cursor.fetchall())
+        cursor.close()
+
     def db_check_if_record_exists(self, connection, column, value):
         cursor = connection.cursor()
         cursor.execute(sql.SQL(self.COMMANDS['check_if_such_already_exists']).format(sql.Identifier(column)), {'value' : value})
-        print('already exists')
         return cursor.fetchone()[0]
 
     def db_update(self, connection, api_output):
 
         cursor = connection.cursor()
+        duplicate_counter = 0
 
         for _, data_dict in api_output.items():
             record_to_write = [data for data in data_dict.values()]
             record_title = record_to_write[0]
+
             if self.db_check_if_record_exists(connection,'title',record_title):
+                duplicate_counter += 1
                 continue
             cursor.execute(self.COMMANDS['update_table'], tuple(record_to_write))
         print('table updated')
+        print(duplicate_counter, ' duplicates were found')
 
         connection.commit()
         cursor.close()
